@@ -105,7 +105,7 @@ public class PlayerController : MonoBehaviour {
 	void FixedUpdate()
 	{
 		Move ();
-		if (Input.GetKeyDown ("space") && !isJumping && Time.time - lastJump > jumpCD) {
+		if (Input.GetKey ("space") && !isJumping && Time.time - lastJump > jumpCD) {
 			rb.AddForce(new Vector3 (0f, jumpHeight, 0f));
 			isJumping = true;
 			lastJump = Time.time;
