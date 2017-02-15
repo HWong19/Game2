@@ -29,13 +29,12 @@ public class BulletController : MonoBehaviour {
 	void OnTriggerEnter( Collider other)
 	{
 		if (other.gameObject.CompareTag ("Enemy")) {
-
 			Destroy (other.gameObject);
-			Destroy(gameObject);
-		}
-		else if(other.gameObject.CompareTag("Player"))
-		{
+			Destroy (gameObject);
+		} else if (other.gameObject.CompareTag ("Player")) {
 			other.gameObject.SendMessage ("PlayerShot");
+			Destroy (gameObject);
+		} else if (other.gameObject.CompareTag ("Wall") || other.gameObject.CompareTag("Floor")) {
 			Destroy (gameObject);
 		}
 	}

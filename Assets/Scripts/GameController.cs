@@ -7,9 +7,15 @@ using UnityEngine.SceneManagement;
 public class GameController : MonoBehaviour {
 
 
-	public Text scoretext;
+	public Text scoreText;
 	public Text gameOverText;
 	public Button restartButton;
+	public GameObject spawner;
+	public GameObject player;
+	public int scoreToUnlockShotgun;
+	public int scoreToUnlockJump;
+	public int scoreToUpgradeRifle;
+
 	int score;
 
 
@@ -27,12 +33,24 @@ public class GameController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		scoretext.text = "Score: " + score;
+		scoreText.text = "Score: " + score;
+
 	}
 
 	void IncScore()
 	{
 		score += 100;
+		if (score == scoreToUnlockShotgun) {
+			spawner.SendMessage ("IncreaseSpawnRate");
+			player.SendMessage ("UnlockItem");
+		} else if (score == scoreToUnlockJump) {
+			spawner.SendMessage ("IncreaseSpawnRate");
+			player.SendMessage ("UnlockItem");
+		} else if (score == scoreToUpgradeRifle) {
+			spawner.SendMessage ("IncreaseSpawnRate");
+			player.SendMessage ("UnlockItem");
+		}
+
 	}
 
 	void Death()
