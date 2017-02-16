@@ -69,7 +69,7 @@ public class SpawnerScript : MonoBehaviour {
 
 	void InstantiateEnemy(float x, float z)
 	{
-		Instantiate (zombie, gameObject.transform.position + new Vector3 (x, 0f, z), new Quaternion ());
+		Instantiate (zombie, gameObject.transform.position + new Vector3 (x, player.transform.position.y + 2f, z), new Quaternion ());
 	}
 
 	void IncreaseSpawnRate()

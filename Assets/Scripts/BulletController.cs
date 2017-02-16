@@ -5,8 +5,8 @@ using UnityEngine.Events;
 
 public class BulletController : MonoBehaviour {
 
-	public float bulletspeed = 30f;
-	public float maxDistance = 300f;
+	public float bulletspeed;
+	public float maxDistance;
 
 
 	Vector3 startPos;

@@ -14,10 +14,10 @@ public class GameController : MonoBehaviour {
 	public GameObject player;
 	public int scoreToUnlockShotgun;
 	public int scoreToUnlockJump;
-	public int scoreToUpgradeRifle;
+	public float scaleFactor;
 
 	int score;
-
+	int scoreTillNextUpgrade;
 
 
 	void Awake()
@@ -28,7 +28,7 @@ public class GameController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		score = 0;
-
+		scoreTillNextUpgrade = scoreToUnlockJump;
 	}
 	
 	// Update is called once per frame
@@ -39,14 +39,15 @@ public class GameController : MonoBehaviour {
 
 	void IncScore()
 	{
-		score += 100;
+		score += 1;
 		if (score == scoreToUnlockShotgun) {
 			spawner.SendMessage ("IncreaseSpawnRate");
 			player.SendMessage ("UnlockItem");
 		} else if (score == scoreToUnlockJump) {
 			spawner.SendMessage ("IncreaseSpawnRate");
 			player.SendMessage ("UnlockItem");
-		} else if (score == scoreToUpgradeRifle) {
+		} else if (score >  scoreTillNextUpgrade * scaleFactor) {
+			scoreTillNextUpgrade = score; 
 			spawner.SendMessage ("IncreaseSpawnRate");
 			player.SendMessage ("UnlockItem");
 		}

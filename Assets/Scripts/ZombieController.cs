@@ -7,6 +7,7 @@ public class ZombieController : MonoBehaviour {
 
 	public float speed;
 	public float maxSpeed;
+	public GameObject healthPack;
 
 	GameObject player;
 	Rigidbody rb;
@@ -59,6 +60,11 @@ public class ZombieController : MonoBehaviour {
 		try{
 			controller.SendMessage ("IncScore");
 			spawner.SendMessage ("ZombieShot");
+			if (Random.value > 0.97f)
+			{
+				healthPack.transform.position = transform.position;
+				Instantiate(healthPack);
+			}
 		}
 		catch(MissingReferenceException) {
 		}

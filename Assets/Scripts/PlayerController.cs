@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour {
 	bool gotRifle;
 	bool gotShotgun;
 	bool gotJump;
-	bool upgradedRifle;
+
 
 	Animator anim;
 
@@ -67,7 +67,6 @@ public class PlayerController : MonoBehaviour {
 		gotRifle = false;
 		gotShotgun = false;
 		gotJump = false;
-		upgradedRifle = false;
 
 		announcementCoroutune = HandlePickUps ();
 
@@ -176,6 +175,18 @@ public class PlayerController : MonoBehaviour {
 		} 
 	}
 
+	void OnTriggerEnter(Collider other)
+	{
+		if (other.CompareTag ("Crate")) {
+			Destroy (other.gameObject);
+			health += 20;
+			if (health > 100) {
+				health = 100;
+			}
+		}
+
+	}
+
 	void PlayerShot()
 	{
 		health -= 10;
@@ -230,7 +241,7 @@ public class PlayerController : MonoBehaviour {
 		if (!gotRifle) {
 			gotRifle = true;
 			announcement.text = "Unlocked Rifle \n Hold left mouse button to fire rifle";
-			announcement.gameObject.SetActive (true);
+
 		} else if (!gotShotgun) {
 			gotShotgun = true;
 			announcement.text = "Unlocked Shotgun \n Press right mouse button to fire shotgun";
@@ -241,13 +252,22 @@ public class PlayerController : MonoBehaviour {
 			announcement.text = "Unlocked Boots \n Press Spacebar to jump";
 			announcement.gameObject.SetActive (true);
 			jumpSlider.gameObject.SetActive (true);
-		} else if (!upgradedRifle) {
-			upgradedRifle = true;
-			announcement.text = "Upgraded Rifle \n Rifle fires faster";
-			rifleCD = rifleCD * 0.75f;
-			announcement.gameObject.SetActive (true);
-		}
+		} else {
+			float rng = Random.value;
+			if (rng < 0.33f) {
+				announcement.text = "Upgraded Rifle \n Rifle fires faster";
+				rifleCD = rifleCD * 0.8f;
 
+			} else if (rng < 0.66f) {
+				announcement.text = "Upgraded Shotgun \n Shotgun reloads faster";
+				shotgunCD = shotgunCD * 0.8f;
+
+			} else {
+				announcement.text = "Upgraded Boots \n Player runs faster";
+				maxSpeed = maxSpeed * 1.2f;
+			}
+		}
+		announcement.gameObject.SetActive (true);
 		yield return new WaitForSecondsRealtime (5f);
 		announcement.gameObject.SetActive (false);
 		StopCoroutine (announcementCoroutune);
