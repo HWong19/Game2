@@ -7,6 +7,7 @@ public class SpawnerScript : MonoBehaviour {
 
 	public GameObject player;
 	public GameObject zombie;
+	public GameObject bigZombie;
 	public Text zombieCountText;
 	public int spawnCap;
 	public float xscreen;
@@ -16,11 +17,13 @@ public class SpawnerScript : MonoBehaviour {
 
 	int spawned;
 	float spawnFrequency;
+	float bigZombieSpawnChance;
 	// Use this for initialization
 	void Start () {
 		StartCoroutine (SpawnEnemy());
 		spawned = 0;
 		spawnFrequency = fastestSpawnFrequency;
+		bigZombieSpawnChance = 0.01f;
 	}
 	
 	// Update is called once per frame
@@ -56,7 +59,7 @@ public class SpawnerScript : MonoBehaviour {
 				if (gameObject.transform.position.x + x < 120 && gameObject.transform.position.x + x > -120 && gameObject.transform.position.z + z < 120 && gameObject.transform.position.z + z > -120)
 				{
 					InstantiateEnemy (x,z);
-					++spawned;
+
 				}
 			}
 		}
@@ -69,12 +72,19 @@ public class SpawnerScript : MonoBehaviour {
 
 	void InstantiateEnemy(float x, float z)
 	{
-		Instantiate (zombie, gameObject.transform.position + new Vector3 (x, player.transform.position.y + 2f, z), new Quaternion ());
+		if (Random.value > bigZombieSpawnChance) {
+			Instantiate (zombie, gameObject.transform.position + new Vector3 (x, player.transform.position.y + 2f, z), new Quaternion ());
+			++spawned;
+		} else {
+			Instantiate (bigZombie, gameObject.transform.position + new Vector3 (x, player.transform.position.y + 2f, z), new Quaternion ());
+			++spawned;
+		}
 	}
 
 	void IncreaseSpawnRate()
 	{
-		fastestSpawnFrequency = fastestSpawnFrequency * 0.8f;
-		frequencyIncrement = frequencyIncrement * 0.8f;
+		fastestSpawnFrequency = fastestSpawnFrequency * 0.85f;
+		frequencyIncrement = frequencyIncrement * 0.85f;
+		bigZombieSpawnChance = bigZombieSpawnChance + 0.005f;
 	}
 }

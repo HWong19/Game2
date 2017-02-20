@@ -28,8 +28,8 @@ public class BulletController : MonoBehaviour {
 
 	void OnTriggerEnter( Collider other)
 	{
-		if (other.gameObject.CompareTag ("Enemy")) {
-			Destroy (other.gameObject);
+		if (other.gameObject.CompareTag ("Zombie") || other.gameObject.CompareTag("Big Zombie")) {
+			other.gameObject.SendMessage ("TakeDamage");
 			Destroy (gameObject);
 		} else if (other.gameObject.CompareTag ("Player")) {
 			other.gameObject.SendMessage ("PlayerShot");

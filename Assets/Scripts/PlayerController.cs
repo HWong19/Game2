@@ -19,19 +19,22 @@ public class PlayerController : MonoBehaviour {
 	public Slider shotgunSlider;
 	public Slider jumpSlider;
 	public Slider healthbar;
+	public Slider berserkSlider;
 	public Text announcement;
 
 	public float rifleCD;
 	public float shotgunCD;
 	public float jumpCD;
+	public float berserkDuration;
 
 	float x;
 	float z;
 	float health;
 
-	bool gotRifle;
-	bool gotShotgun;
-	bool gotJump;
+	public bool gotRifle;
+	public bool gotShotgun;
+	public bool gotJump;
+	public bool gotBerserk;
 
 
 	Animator anim;
@@ -46,10 +49,12 @@ public class PlayerController : MonoBehaviour {
 
 
 	bool isJumping;
+	bool isBerserk;
 
 	float lastRifle;
 	float lastShotgun;
 	float lastJump;
+	float lastBerserk;
 
 	IEnumerator announcementCoroutune;
 	// Use this for initialization
@@ -64,9 +69,6 @@ public class PlayerController : MonoBehaviour {
 		lastJump = 0f;
 		health = 100f;
 
-		gotRifle = false;
-		gotShotgun = false;
-		gotJump = false;
 
 		announcementCoroutune = HandlePickUps ();
 
@@ -78,9 +80,11 @@ public class PlayerController : MonoBehaviour {
 		LookAtMouse ();
 		float time = Time.time;
 
-		HandleMouseInputs (time);
+		HandleInputs (time);
 		UpdateUI (time);
-
+		if (time - lastBerserk > berserkDuration) {
+			isBerserk = false;
+		}
 	}
 
 	void FixedUpdate()
@@ -134,7 +138,7 @@ public class PlayerController : MonoBehaviour {
 		bullet.transform.rotation = transform.rotation;
 		bullet.transform.position = transform.position;
 		bullet.transform.LookAt (playerToMouse);
-		bullet.transform.Translate (new Vector3 (0f, 1f, 2f));
+		bullet.transform.Translate (new Vector3 (0f, 2f, 2f));
 		Instantiate (bullet);
 		bullet.transform.eulerAngles = new Vector3 (0, bullet.transform.eulerAngles.y + 5f, 0);
 		Instantiate (bullet);
@@ -154,7 +158,7 @@ public class PlayerController : MonoBehaviour {
 		bullet.transform.rotation = transform.rotation;
 		bullet.transform.position = transform.position;
 		bullet.transform.LookAt (playerToMouse);
-		bullet.transform.Translate (new Vector3 (0f, 1f, 2f));
+		bullet.transform.Translate (new Vector3 (0f, 2f, 2f));
 		Instantiate (bullet);
 		lastRifle = Time.time;
 	}
@@ -162,8 +166,16 @@ public class PlayerController : MonoBehaviour {
 
 	void OnCollisionEnter(Collision col)
 	{
-		if (col.gameObject.CompareTag ("Enemy")) {
+		if (col.gameObject.CompareTag ("Zombie")) {
 			health -= 0.05f * col.relativeVelocity.magnitude;
+			if (health <= 0) {
+				gameObject.SetActive (false);
+				gameManager.SendMessage ("Death");
+				deathEffects.transform.position = transform.position;
+				deathEffects.SetActive (true);
+			}
+		} else if (col.gameObject.CompareTag ("Big Zombie")) {
+			health -= 0.15f * col.relativeVelocity.magnitude;
 			if (health <= 0) {
 				gameObject.SetActive (false);
 				gameManager.SendMessage ("Death");
@@ -173,6 +185,13 @@ public class PlayerController : MonoBehaviour {
 		} else if (col.gameObject.CompareTag ("Floor")) {
 			isJumping = false;
 		} 
+	}
+
+	void OnCollisionStay(Collision col)
+	{
+		if (isBerserk && (col.gameObject.CompareTag("Zombie") ||col.gameObject.CompareTag("Big Zombie"))) {
+			col.gameObject.SendMessage ("TakeDamage");
+		}
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -199,7 +218,7 @@ public class PlayerController : MonoBehaviour {
 	}
 
 
-	void HandleMouseInputs(float time)
+	void HandleInputs(float time)
 	{
 		if (Input.GetMouseButton (0)) {
 			if (time - lastRifle > rifleCD) {
@@ -210,7 +229,14 @@ public class PlayerController : MonoBehaviour {
 			if (time - lastShotgun > shotgunCD) {
 				Shotgun ();
 			}
-		} 
+		}
+		if (Input.GetKeyDown("q")){
+			if (!isBerserk) {
+				lastBerserk = time;
+				isBerserk = true;
+				health = health * 0.75f;
+			}
+		}
 
 	}
 	void UpdateUI(float time)
@@ -233,6 +259,11 @@ public class PlayerController : MonoBehaviour {
 		}
 		jumpSlider.value = jumpCDpercent * 100;
 
+		float berserkCDpercent = (time - lastBerserk) / berserkDuration;
+		if (berserkCDpercent > 1) {
+			berserkCDpercent = 1f;
+		}
+		berserkSlider.value = berserkCDpercent * 100;
 		healthbar.value = health;
 	}
 		
@@ -252,19 +283,28 @@ public class PlayerController : MonoBehaviour {
 			announcement.text = "Unlocked Boots \n Press Spacebar to jump";
 			announcement.gameObject.SetActive (true);
 			jumpSlider.gameObject.SetActive (true);
+		} else if (!gotBerserk) {
+			gotBerserk = true;
+			announcement.text = "Unlocked Berserk Mode \n press q to activate and deal damage to nearby enemies \n Warning: berserk mode costs health";
+			announcement.gameObject.SetActive (true);
+			berserkSlider.gameObject.SetActive (true);
 		} else {
 			float rng = Random.value;
-			if (rng < 0.33f) {
+			if (rng < 0.30f) {
 				announcement.text = "Upgraded Rifle \n Rifle fires faster";
 				rifleCD = rifleCD * 0.8f;
 
-			} else if (rng < 0.66f) {
+			} else if (rng < 0.60f) {
 				announcement.text = "Upgraded Shotgun \n Shotgun reloads faster";
 				shotgunCD = shotgunCD * 0.8f;
 
-			} else {
-				announcement.text = "Upgraded Boots \n Player runs faster";
-				maxSpeed = maxSpeed * 1.2f;
+			} else if (rng < 0.90f) {
+				announcement.text = "Upgraded Berserk \n Berserk lasts longer";
+				berserkDuration += 1;
+			}
+				else {
+				announcement.text = "Upgraded Boots \n Player jumps more";
+				jumpCD = jumpCD * 0.8f;
 			}
 		}
 		announcement.gameObject.SetActive (true);

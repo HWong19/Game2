@@ -11,6 +11,6 @@ public class CrateController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		transform.Rotate (new Vector3 (40, 30, 20) * Time.deltaTime);
+		transform.Rotate (new Vector3 (-40, -30, -20) * Time.deltaTime);
 	}
 }

@@ -8,13 +8,14 @@ public class ZombieController : MonoBehaviour {
 	public float speed;
 	public float maxSpeed;
 	public GameObject healthPack;
+	public int maxHealth;
 
 	GameObject player;
 	Rigidbody rb;
 	Animator animator;
 	GameObject controller;
 	GameObject spawner;
-
+	int health;
 	// Use this for initialization
 	void Start () {
 		rb = gameObject.GetComponent<Rigidbody> ();
@@ -23,6 +24,7 @@ public class ZombieController : MonoBehaviour {
 		animator.SetBool ("Attack", false);
 		controller = GameObject.FindGameObjectWithTag ("GameController");
 		spawner = GameObject.FindGameObjectWithTag ("Spawner");
+		health = maxHealth;
 	}
 	
 	// Update is called once per frame
@@ -57,16 +59,24 @@ public class ZombieController : MonoBehaviour {
 
 	void OnDestroy()
 	{
-		try{
-			controller.SendMessage ("IncScore");
+
+	}
+
+	void TakeDamage()
+	{
+		--health;
+		if (health == 0) {
+			Destroy (gameObject);
+			for(int i = 0; i < maxHealth; ++i)
+			{
+				controller.SendMessage ("IncScore");
+			}
 			spawner.SendMessage ("ZombieShot");
 			if (Random.value > 0.97f)
 			{
-				healthPack.transform.position = transform.position;
+				healthPack.transform.position = transform.position + new Vector3 (0f, 2f, 0f);
 				Instantiate(healthPack);
 			}
-		}
-		catch(MissingReferenceException) {
 		}
 	}
 }

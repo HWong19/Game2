@@ -14,6 +14,7 @@ public class GameController : MonoBehaviour {
 	public GameObject player;
 	public int scoreToUnlockShotgun;
 	public int scoreToUnlockJump;
+	public int scoreToUnlockBerserk;
 	public float scaleFactor;
 
 	int score;
@@ -44,6 +45,9 @@ public class GameController : MonoBehaviour {
 			spawner.SendMessage ("IncreaseSpawnRate");
 			player.SendMessage ("UnlockItem");
 		} else if (score == scoreToUnlockJump) {
+			spawner.SendMessage ("IncreaseSpawnRate");
+			player.SendMessage ("UnlockItem");
+		} else if (score == scoreToUnlockBerserk) {
 			spawner.SendMessage ("IncreaseSpawnRate");
 			player.SendMessage ("UnlockItem");
 		} else if (score >  scoreTillNextUpgrade * scaleFactor) {
