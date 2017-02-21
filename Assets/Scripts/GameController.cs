@@ -4,14 +4,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+
 public class GameController : MonoBehaviour {
 
 
 	public Text scoreText;
 	public Text gameOverText;
+	public Text highScoreText;
 	public Button restartButton;
 	public GameObject spawner;
 	public GameObject player;
+	public GameState gameState;
 	public int scoreToUnlockShotgun;
 	public int scoreToUnlockJump;
 	public int scoreToUnlockBerserk;
@@ -30,6 +33,7 @@ public class GameController : MonoBehaviour {
 	void Start () {
 		score = 0;
 		scoreTillNextUpgrade = scoreToUnlockJump;
+		highScoreText.text = "High Score: " + gameState.highscore;
 	}
 	
 	// Update is called once per frame
@@ -63,6 +67,9 @@ public class GameController : MonoBehaviour {
 		gameOverText.text = "You Died";
 		gameOverText.gameObject.SetActive (true);
 		restartButton.gameObject.SetActive (true);
+		if (score > gameState.highscore) {
+			gameState.highscore = score;
+		}
 	}
 		
 	void Restart()

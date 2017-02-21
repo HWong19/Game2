@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class StartScreenScript : MonoBehaviour {
+public class BerserkParticleController : MonoBehaviour {
 
-	public GameState gameState;
+	public GameObject player;
 
 	// Use this for initialization
 	void Start () {
@@ -14,11 +13,6 @@ public class StartScreenScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
-
-	void StartGame()
-	{
-		SceneManager.LoadScene ("In Game");
+		transform.position = player.transform.position;
 	}
 }

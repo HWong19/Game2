@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class StartScreenScript : MonoBehaviour {
+[CreateAssetMenu]
+public class GameState : ScriptableObject {
 
-	public GameState gameState;
+	public int highscore;
 
 	// Use this for initialization
 	void Start () {
@@ -15,10 +15,5 @@ public class StartScreenScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		
-	}
-
-	void StartGame()
-	{
-		SceneManager.LoadScene ("In Game");
 	}
 }

@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
 	public GameObject bullet;
 	public GameObject deathEffects;
 	public GameObject gameManager;
+	public GameObject berserkParticles;
 
 	public Slider rifleSlider;
 	public Slider shotgunSlider;
@@ -26,6 +27,7 @@ public class PlayerController : MonoBehaviour {
 	public float shotgunCD;
 	public float jumpCD;
 	public float berserkDuration;
+	public float maxHealth;
 
 	float x;
 	float z;
@@ -67,7 +69,7 @@ public class PlayerController : MonoBehaviour {
 		lastRifle = 0f;
 		lastShotgun = 0f;
 		lastJump = 0f;
-		health = 100f;
+		health = maxHealth;
 
 
 		announcementCoroutune = HandlePickUps ();
@@ -84,6 +86,7 @@ public class PlayerController : MonoBehaviour {
 		UpdateUI (time);
 		if (time - lastBerserk > berserkDuration) {
 			isBerserk = false;
+			berserkParticles.SetActive (false);
 		}
 	}
 
@@ -166,23 +169,7 @@ public class PlayerController : MonoBehaviour {
 
 	void OnCollisionEnter(Collision col)
 	{
-		if (col.gameObject.CompareTag ("Zombie")) {
-			health -= 0.05f * col.relativeVelocity.magnitude;
-			if (health <= 0) {
-				gameObject.SetActive (false);
-				gameManager.SendMessage ("Death");
-				deathEffects.transform.position = transform.position;
-				deathEffects.SetActive (true);
-			}
-		} else if (col.gameObject.CompareTag ("Big Zombie")) {
-			health -= 0.15f * col.relativeVelocity.magnitude;
-			if (health <= 0) {
-				gameObject.SetActive (false);
-				gameManager.SendMessage ("Death");
-				deathEffects.transform.position = transform.position;
-				deathEffects.SetActive (true);
-			}
-		} else if (col.gameObject.CompareTag ("Floor")) {
+if (col.gameObject.CompareTag ("Floor")) {
 			isJumping = false;
 		} 
 	}
@@ -192,6 +179,24 @@ public class PlayerController : MonoBehaviour {
 		if (isBerserk && (col.gameObject.CompareTag("Zombie") ||col.gameObject.CompareTag("Big Zombie"))) {
 			col.gameObject.SendMessage ("TakeDamage");
 		}
+
+		if (col.gameObject.CompareTag ("Zombie")) {
+			health -= 0.1f;
+			if (health <= 0) {
+				gameObject.SetActive (false);
+				gameManager.SendMessage ("Death");
+				deathEffects.transform.position = transform.position;
+				deathEffects.SetActive (true);
+			}
+		} else if (col.gameObject.CompareTag ("Big Zombie")) {
+			health -= 0.3f;
+			if (health <= 0) {
+				gameObject.SetActive (false);
+				gameManager.SendMessage ("Death");
+				deathEffects.transform.position = transform.position;
+				deathEffects.SetActive (true);
+			}
+		}
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -199,8 +204,8 @@ public class PlayerController : MonoBehaviour {
 		if (other.CompareTag ("Crate")) {
 			Destroy (other.gameObject);
 			health += 20;
-			if (health > 100) {
-				health = 100;
+			if (health > maxHealth) {
+				health = maxHealth;
 			}
 		}
 
@@ -225,16 +230,17 @@ public class PlayerController : MonoBehaviour {
 				Rifle ();
 			}
 		}
-		else if (Input.GetMouseButtonDown (1) && gotShotgun) {
+		if (Input.GetMouseButton (1) && gotShotgun) {
 			if (time - lastShotgun > shotgunCD) {
 				Shotgun ();
 			}
 		}
-		if (Input.GetKeyDown("q")){
+		if (Input.GetKeyDown("q") && gotBerserk){
 			if (!isBerserk) {
 				lastBerserk = time;
 				isBerserk = true;
 				health = health * 0.75f;
+				berserkParticles.SetActive (true);
 			}
 		}
 
@@ -264,7 +270,7 @@ public class PlayerController : MonoBehaviour {
 			berserkCDpercent = 1f;
 		}
 		berserkSlider.value = berserkCDpercent * 100;
-		healthbar.value = health;
+		healthbar.value = (health/maxHealth) * 100;
 	}
 		
 	IEnumerator HandlePickUps()
@@ -290,21 +296,20 @@ public class PlayerController : MonoBehaviour {
 			berserkSlider.gameObject.SetActive (true);
 		} else {
 			float rng = Random.value;
-			if (rng < 0.30f) {
+			if (rng < 0.25f) {
 				announcement.text = "Upgraded Rifle \n Rifle fires faster";
 				rifleCD = rifleCD * 0.8f;
 
-			} else if (rng < 0.60f) {
+			} else if (rng < 0.50f) {
 				announcement.text = "Upgraded Shotgun \n Shotgun reloads faster";
 				shotgunCD = shotgunCD * 0.8f;
 
-			} else if (rng < 0.90f) {
+			} else if (rng < 0.75f) {
 				announcement.text = "Upgraded Berserk \n Berserk lasts longer";
-				berserkDuration += 1;
-			}
-				else {
-				announcement.text = "Upgraded Boots \n Player jumps more";
-				jumpCD = jumpCD * 0.8f;
+				berserkDuration += 0.5f;
+			} else {
+				announcement.text = "Upgraded Max Health";
+				maxHealth += 20;
 			}
 		}
 		announcement.gameObject.SetActive (true);

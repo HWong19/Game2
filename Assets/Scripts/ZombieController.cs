@@ -74,7 +74,7 @@ public class ZombieController : MonoBehaviour {
 			spawner.SendMessage ("ZombieShot");
 			if (Random.value > 0.97f)
 			{
-				healthPack.transform.position = transform.position + new Vector3 (0f, 2f, 0f);
+				healthPack.transform.position = transform.position + new Vector3 (0f, 1f, 0f);
 				Instantiate(healthPack);
 			}
 		}
