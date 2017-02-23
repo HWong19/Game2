@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BerserkParticleController : MonoBehaviour {
+public class ParticleController : MonoBehaviour {
 
 	public GameObject player;
 

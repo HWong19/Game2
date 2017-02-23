@@ -5,16 +5,18 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour {
 
-	public float speed;
+	public float maxAccel;
 	public float jumpHeight;
 	public float blowback;
 	public float maxSpeed;
-
+	public float freezingDuration;
 
 	public GameObject bullet;
+	public GameObject shotgunBullet;
 	public GameObject deathEffects;
 	public GameObject gameManager;
 	public GameObject berserkParticles;
+	public GameObject freezingParticles;
 
 	public Slider rifleSlider;
 	public Slider shotgunSlider;
@@ -28,6 +30,9 @@ public class PlayerController : MonoBehaviour {
 	public float jumpCD;
 	public float berserkDuration;
 	public float maxHealth;
+
+	float currAccel;
+	float currMaxSpeed;
 
 	float x;
 	float z;
@@ -52,12 +57,14 @@ public class PlayerController : MonoBehaviour {
 
 	bool isJumping;
 	bool isBerserk;
+	bool isFreezing;
 
 	float lastRifle;
 	float lastShotgun;
 	float lastJump;
 	float lastBerserk;
 
+	float lastFrozen;
 	IEnumerator announcementCoroutune;
 	// Use this for initialization
 	void Start () {
@@ -70,7 +77,8 @@ public class PlayerController : MonoBehaviour {
 		lastShotgun = 0f;
 		lastJump = 0f;
 		health = maxHealth;
-
+		currAccel = maxAccel;
+		currMaxSpeed = maxSpeed;
 
 		announcementCoroutune = HandlePickUps ();
 
@@ -87,6 +95,13 @@ public class PlayerController : MonoBehaviour {
 		if (time - lastBerserk > berserkDuration) {
 			isBerserk = false;
 			berserkParticles.SetActive (false);
+		}
+
+		if (isFreezing && Time.time - lastFrozen > freezingDuration) {
+			currAccel = maxAccel;
+			currMaxSpeed = maxSpeed;
+			isFreezing = false;
+			freezingParticles.SetActive (false);
 		}
 	}
 
@@ -118,10 +133,10 @@ public class PlayerController : MonoBehaviour {
 		//gameObject.transform.Translate (new Vector3 (x, 0f, z) * speed * Time.deltaTime, Space.World);
 		if (!isJumping)
 			{
-				rb.AddForce(new Vector3(x,0f,z) * speed);
-				if (Mathf.Sqrt((rb.velocity.x * rb.velocity.x) + (rb.velocity.z * rb.velocity.z))  > maxSpeed) 
+				rb.AddForce(new Vector3(x,0f,z) * currAccel);
+				if (Mathf.Sqrt((rb.velocity.x * rb.velocity.x) + (rb.velocity.z * rb.velocity.z))  > currMaxSpeed) 
 				{
-					rb.velocity = rb.velocity.normalized * maxSpeed;
+					rb.velocity = rb.velocity.normalized * currMaxSpeed;
 				}
 			}
 	}
@@ -138,21 +153,21 @@ public class PlayerController : MonoBehaviour {
 	void Shotgun()
 	{
 		rb.AddRelativeForce (new Vector3 (0f, 0f, -blowback));
-		bullet.transform.rotation = transform.rotation;
-		bullet.transform.position = transform.position;
-		bullet.transform.LookAt (playerToMouse);
-		bullet.transform.Translate (new Vector3 (0f, 2f, 2f));
-		Instantiate (bullet);
-		bullet.transform.eulerAngles = new Vector3 (0, bullet.transform.eulerAngles.y + 5f, 0);
-		Instantiate (bullet);
-		bullet.transform.eulerAngles = new Vector3 (0, bullet.transform.eulerAngles.y + 5f, 0);
-		Instantiate (bullet);
-		bullet.transform.eulerAngles = new Vector3 (0, bullet.transform.eulerAngles.y - 15f, 0);
-		Instantiate (bullet);
-		bullet.transform.eulerAngles = new Vector3 (0, bullet.transform.eulerAngles.y - 5f, 0);
-		Instantiate (bullet);
-		bullet.transform.eulerAngles = new Vector3 (0, bullet.transform.eulerAngles.y - 5f, 0);
-		Instantiate (bullet);
+		shotgunBullet.transform.rotation = transform.rotation;
+		shotgunBullet.transform.position = transform.position;
+		shotgunBullet.transform.LookAt (playerToMouse);
+		shotgunBullet.transform.Translate (new Vector3 (0f, 2f, 2f));
+		Instantiate (shotgunBullet);
+		shotgunBullet.transform.eulerAngles = new Vector3 (0, shotgunBullet.transform.eulerAngles.y + 5f, 0);
+		Instantiate (shotgunBullet);
+		shotgunBullet.transform.eulerAngles = new Vector3 (0, shotgunBullet.transform.eulerAngles.y + 5f, 0);
+		Instantiate (shotgunBullet);
+		shotgunBullet.transform.eulerAngles = new Vector3 (0, shotgunBullet.transform.eulerAngles.y - 15f, 0);
+		Instantiate (shotgunBullet);
+		shotgunBullet.transform.eulerAngles = new Vector3 (0, shotgunBullet.transform.eulerAngles.y - 5f, 0);
+		Instantiate (shotgunBullet);
+		shotgunBullet.transform.eulerAngles = new Vector3 (0, shotgunBullet.transform.eulerAngles.y - 5f, 0);
+		Instantiate (shotgunBullet);
 		lastShotgun = Time.time;
 	}
 
@@ -176,7 +191,7 @@ if (col.gameObject.CompareTag ("Floor")) {
 
 	void OnCollisionStay(Collision col)
 	{
-		if (isBerserk && (col.gameObject.CompareTag("Zombie") ||col.gameObject.CompareTag("Big Zombie"))) {
+		if (isBerserk && (col.gameObject.CompareTag("Zombie") ||col.gameObject.CompareTag("Big Zombie")) || col.gameObject.CompareTag("Freezing Zombie")) {
 			col.gameObject.SendMessage ("TakeDamage");
 		}
 
@@ -196,6 +211,19 @@ if (col.gameObject.CompareTag ("Floor")) {
 				deathEffects.transform.position = transform.position;
 				deathEffects.SetActive (true);
 			}
+		} else if (col.gameObject.CompareTag ("Freezing Zombie")) {
+			health -= 0.2f;
+			if (health <= 0) {
+				gameObject.SetActive (false);
+				gameManager.SendMessage ("Death");
+				deathEffects.transform.position = transform.position;
+				deathEffects.SetActive (true);
+			}
+			isFreezing = true;
+			lastFrozen = Time.time;
+			currMaxSpeed = maxSpeed / 2;
+			currAccel = maxAccel / 2;
+			freezingParticles.SetActive (true);
 		}
 	}
 
@@ -304,9 +332,12 @@ if (col.gameObject.CompareTag ("Floor")) {
 				announcement.text = "Upgraded Shotgun \n Shotgun reloads faster";
 				shotgunCD = shotgunCD * 0.8f;
 
-			} else if (rng < 0.75f) {
+			} else if (rng < 0.65f) {
 				announcement.text = "Upgraded Berserk \n Berserk lasts longer";
 				berserkDuration += 0.5f;
+			} else if (rng < 0.8f) {
+				announcement.text = "Upgraded Jump \n Jump more often";
+				jumpCD = jumpCD * 0.8f;
 			} else {
 				announcement.text = "Upgraded Max Health";
 				maxHealth += 20;

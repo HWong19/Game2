@@ -7,7 +7,7 @@ public class BulletController : MonoBehaviour {
 
 	public float bulletspeed;
 	public float maxDistance;
-
+	public bool canPassThroughEnemies;
 
 	Vector3 startPos;
 
@@ -28,9 +28,11 @@ public class BulletController : MonoBehaviour {
 
 	void OnTriggerEnter( Collider other)
 	{
-		if (other.gameObject.CompareTag ("Zombie") || other.gameObject.CompareTag("Big Zombie")) {
+		if (other.gameObject.CompareTag ("Zombie") || other.gameObject.CompareTag("Big Zombie") || other.gameObject.CompareTag("Freezing Zombie")) {
 			other.gameObject.SendMessage ("TakeDamage");
-			Destroy (gameObject);
+			if (!canPassThroughEnemies) {
+				Destroy (gameObject);
+			}
 		} else if (other.gameObject.CompareTag ("Player")) {
 			other.gameObject.SendMessage ("PlayerShot");
 			Destroy (gameObject);

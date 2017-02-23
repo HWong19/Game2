@@ -8,6 +8,7 @@ public class SpawnerScript : MonoBehaviour {
 	public GameObject player;
 	public GameObject zombie;
 	public GameObject bigZombie;
+	public GameObject freezingZombie;
 	public Text zombieCountText;
 	public int spawnCap;
 	public float xscreen;
@@ -17,13 +18,13 @@ public class SpawnerScript : MonoBehaviour {
 
 	int spawned;
 	float spawnFrequency;
-	float bigZombieSpawnChance;
+	public float bigZombieSpawnChance;
+	public float freezingZombieSpawnChance;
 	// Use this for initialization
 	void Start () {
 		StartCoroutine (SpawnEnemy());
 		spawned = 0;
 		spawnFrequency = fastestSpawnFrequency;
-		bigZombieSpawnChance = 0.01f;
 	}
 	
 	// Update is called once per frame
@@ -72,11 +73,14 @@ public class SpawnerScript : MonoBehaviour {
 
 	void InstantiateEnemy(float x, float z)
 	{
-		if (Random.value > bigZombieSpawnChance) {
-			Instantiate (zombie, gameObject.transform.position + new Vector3 (x, player.transform.position.y + 2f, z), new Quaternion ());
-			++spawned;
-		} else {
+		float value = Random.value;
+		if (value < bigZombieSpawnChance) {
 			Instantiate (bigZombie, gameObject.transform.position + new Vector3 (x, player.transform.position.y + 2f, z), new Quaternion ());
+			++spawned;
+		} else if (value < (bigZombieSpawnChance + freezingZombieSpawnChance)) {
+			Instantiate (freezingZombie, gameObject.transform.position + new Vector3 (x, player.transform.position.y + 2f, z), new Quaternion ());
+		} else {
+			Instantiate (zombie, gameObject.transform.position + new Vector3 (x, player.transform.position.y + 2f, z), new Quaternion ());
 			++spawned;
 		}
 	}
@@ -85,6 +89,11 @@ public class SpawnerScript : MonoBehaviour {
 	{
 		fastestSpawnFrequency = fastestSpawnFrequency * 0.85f;
 		frequencyIncrement = frequencyIncrement * 0.85f;
-		bigZombieSpawnChance = bigZombieSpawnChance + 0.005f;
+		if (bigZombieSpawnChance < 0.20f) {
+			bigZombieSpawnChance = bigZombieSpawnChance + 0.005f;
+		}
+		if (freezingZombieSpawnChance < 0.20f) {
+			freezingZombieSpawnChance = freezingZombieSpawnChance + 0.005f;
+		}
 	}
 }
