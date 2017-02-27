@@ -3,7 +3,7 @@ cheukhw@uci.edu
 66209666
 
 My game is called Just Shoot Things. It's a top-down arcade-style shooter.
-The goal of the game is to survive and kill as many zombies as possible to rack up points to get the highscore.
+The goal of the game is to survive and kill as many zombies as possible to rack up points to get the highscore (meaning no real, concrete win state.)
 As the player gets more and more points, the spawn rate of the zombies increase and the player gets upgrades to help him survive.
 
 
